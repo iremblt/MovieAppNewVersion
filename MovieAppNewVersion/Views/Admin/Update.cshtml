@@ -1,0 +1,44 @@
+﻿@model UpdateMovieModel
+<h1>Admin Update Movie</h1>
+<hr />
+<form method="post" asp-action="Update" asp-controller="Admin">
+    <div class="row">
+        <div class="col-md-8">
+            <input type="hidden" asp-for="@Model.MovieId" />
+            <div class="form-group">
+                <label asp-for="MovieTitle"></label>
+                <input type="hidden" asp-for="MovieId" value="@Model.MovieId" />
+                <input asp-for="MovieTitle" class="form-control" value="@Model.MovieTitle" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Description"></label>
+                <textarea asp-for="Description" class="form-control">@Model.Description</textarea>
+            </div>
+            <div class="form-group">
+                <label asp-for="About"></label>
+                <textarea asp-for="About" class="form-control">@Model.About</textarea>
+            </div>
+            <div class="form-group">
+                <label asp-for="MovieImage"></label>
+                <input asp-for="MovieImage" class="form-control" value="@Model.MovieImage" />
+            </div>
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </div>
+        <div class="col-md-4">
+            @foreach (var item in (List<Category>)ViewBag.Categories)
+            {
+                <div class="form-check">
+                    <input class="form-check-input" 
+                           type="checkbox" 
+                           name="categoryId"
+                           value="@item.CategoryId" 
+                           id="category_@(item.CategoryId)" @(Model.SelectedCategories.Any(i => i.CategoryId == item.CategoryId) ? "checked" : "") />
+                    <label class="form-check-label" for="category_@(item.CategoryId)">
+                        @item.Name
+                    </label>
+                </div>
+            }
+        </div>
+    </div>
+</form>
+

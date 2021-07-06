@@ -1,0 +1,31 @@
+﻿@model Movie
+<h1>Edit Movie</h1>
+<hr />
+<form method="post" asp-action="Edit" asp-controller="Movies">
+    <div class="form-group">
+        <label asp-for="MovieTitle"></label>
+        <input type="hidden" asp-for="MovieId" value="@Model.MovieId" />
+        <input asp-for="MovieTitle" class="form-control" value="@Model.MovieTitle" />
+    </div>
+    <div class="form-group">
+        <label asp-for="MovieDescription"></label>
+        <textarea asp-for="MovieDescription" class="form-control">@Model.MovieDescription</textarea>
+    </div>
+    <div class="form-group">
+        <label asp-for="MovieAbout"></label>
+        <textarea asp-for="MovieAbout" class="form-control">@Model.MovieAbout</textarea>
+    </div>
+    <div class="form-group">
+        <label asp-for="MovieImage"></label>
+        <input asp-for="MovieImage" class="form-control" value="@Model.MovieImage" />
+    </div>
+    @*
+            <div class="form-group">
+                <label asp-for="CategoryId"></label>
+                <select asp-for="CategoryId" class="form-control" asp-items="@ViewBag.Category">
+                    <option disabled selected value="">Select Category</option>
+                </select>
+            </div>
+    *@
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </form>

@@ -1,0 +1,20 @@
+﻿@model Movie
+<div class="card mb-3">
+        <div class="row g-0">
+            <div class="col-md-3">
+                <img src="/img/@Model.MovieImage" class="img-fluid rounded-start" alt="@Model.MovieTitle" width="512" height="755">
+            </div>
+            <div class="col-md-9">
+                <div class="card-body">
+                    <h5 class="card-title">@Model.MovieTitle</h5>
+                    <p class="card-text">@Model.MovieDescription</p>
+                    <p>
+                        <a asp-action="Details" asp-controller="Movies" asp-route-id="@Model.MovieId" class="btn btn-primary"> Details </a>
+                        <a asp-action="Edit" asp-controller="Movies" asp-route-id="@Model.MovieId" class="btn btn-primary"> Edit </a>
+                        <a asp-action="Delete" asp-controller="Movies" asp-route-id="@Model.MovieId" class="btn btn-danger"> Delete </a>
+                    </p>
+                    <p class="card-text"><small class="text-muted">For more information you can click the details button.</small></p>
+                </div>
+            </div>
+        </div>
+</div>

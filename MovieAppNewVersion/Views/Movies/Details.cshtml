@@ -1,0 +1,36 @@
+﻿@model Movie
+@if (TempData["message"] != null)
+{
+    @section message{
+        @await Html.PartialAsync("_message", (String)TempData["message"])
+    }
+}
+@section menu{
+    @*@await Html.PartialAsync("_menu",Model.categories)*@
+    @await Component.InvokeAsync("Category")
+}
+<div class="card mb-3">
+    <div class="row g-0">
+        <div class="col-md-3">
+            <img src="/img/@Model.MovieImage" class="img-fluid rounded-start" alt="@Model.MovieTitle" width="512" height="755">
+        </div>
+        <div class="col-md-9">
+            <div class="card-body">
+                <h5 class="card-title">@Model.MovieTitle</h5>
+                <p class="card-text">@Model.MovieDescription</p>
+                <p class="card-text">@Model.MovieAbout</p>
+              @*@  @if (Model.MoviePlayers != null)
+                {
+                    <p class="card-text">
+                        <ul>
+                            @foreach (var player in Model.MoviePlayers)
+                            {
+                                <li>@player</li>
+                            }
+                        </ul>
+                    </p>
+                }*@
+            </div>
+        </div>
+    </div>
+</div>

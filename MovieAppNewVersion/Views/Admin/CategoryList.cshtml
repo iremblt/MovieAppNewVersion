@@ -1,0 +1,26 @@
+﻿@model AdminCategoriesViewModel
+<h1>Admin Category List</h1>
+<table class="table table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th style="width:30px;">#</th>
+            <th>Name</th>
+            <th style="width:70px;">Count</th>
+            <th style="width:160px;"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Categories)
+        {
+        <tr>
+            <td>@item.CategoryId</td>
+            <td>@item.CategoryName</td>
+            <td>@item.Count</td>
+            <td>
+                <a asp-action="CategoryUpdate" asp-controller="Admin" asp-route-id="@item.CategoryId" class="btn btn-primary btn-sm">Update</a>
+                <a asp-controller="Admin" asp-action="CategoryDelete" asp-route-id="@item.CategoryId" class="btn btn-danger btn-sm"> Delete </a>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table> 

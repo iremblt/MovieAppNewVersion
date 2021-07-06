@@ -1,0 +1,27 @@
+﻿@model MovieViewModel
+<div id="movies">
+    @if (Model.Movies.Count() > 0)
+    {
+        @foreach (var movie in Model.Movies)
+        {
+            <partial name="/Views/Shared/_movie.cshtml" model="movie" />
+        }
+
+    }
+    else
+    {
+        <div class="alert alert-warning" role="alert">
+            There is no movie in this category.
+        </div>
+    }
+</div>
+@section menu{
+    @*@await Html.PartialAsync("_menu",Model.categories)*@
+    @await Component.InvokeAsync("Category")
+}
+@if (TempData["message"] != null)
+{
+    @section message{
+        @await Html.PartialAsync("_message", (String)TempData["message"])
+    }
+}
