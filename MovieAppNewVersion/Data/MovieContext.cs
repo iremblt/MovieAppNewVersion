@@ -20,13 +20,5 @@ namespace MovieAppNewVersion.Data
         public DbSet<Person> People { get; set; }
         public DbSet<Crew> Crews { get; set; }
         public DbSet<Cast>  Casts { get; set; }
-       // public DbSet<Vote> Votes { get; set; }
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Movie>().Property(b => b.MovieTitle).IsRequired();
-            modelBuilder.Entity<Movie>().Property(b => b.MovieTitle).HasMaxLength(500);
-         //   modelBuilder.Entity<Category>().Property(b => b.Name).IsRequired();
-        //    modelBuilder.Entity<Category>().Property(b => b.Name).HasMaxLength(50);
-        }
     }
 }

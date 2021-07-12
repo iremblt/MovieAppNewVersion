@@ -1,4 +1,4 @@
-﻿@model UpdateCategoryViewModel
+﻿@model Category
 <h1>Edit Category</h1>
 <hr />
 <form method="post" asp-action="CategoryUpdate" asp-controller="Admin">
@@ -6,9 +6,9 @@
         <div class="col-md-3">
             <input type="hidden" asp-for="@Model.CategoryId" />
             <div class="form-group">
-                <label asp-for="CategoryName"></label>
+                <label asp-for="CategoryId"></label>
                 <input type="hidden" asp-for="CategoryId" value="@Model.CategoryId" />
-                <input asp-for="CategoryName" class="form-control" value="@Model.CategoryName" />
+                <input asp-for="Name" class="form-control" value="@Model.Name" />
             </div>
             <button class="btn btn-primary" type="submit">Submit</button>
         </div>
@@ -26,11 +26,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var movie in Model.AdminMovieModels)
+                    @foreach (var movie in Model.Movies)
                     {
                         <tr>
                             <td>
-                                <input type="checkbox" name="movieIds" value="@movie.MovieId" />
+                                <input type="radio" name="movieId" value="@movie.MovieId" />
                             </td>
                             <td>@movie.MovieId</td>
                             <td>
@@ -38,7 +38,8 @@
                             </td>
                             <td>@movie.MovieTitle</td>
                             <td>
-                                <a asp-controller="Admin" asp-action="CategoryUpdate" asp-route-id="@movie.MovieId" class="btn btn-primary btn-sm"> Update </a>>                            </td>
+                                <a asp-controller="Admin" asp-action="CategoryUpdate" asp-route-id="@movie.MovieId" class="btn btn-primary btn-sm"> Update </a>             
+                            </td>
                                  
                         </tr>
 

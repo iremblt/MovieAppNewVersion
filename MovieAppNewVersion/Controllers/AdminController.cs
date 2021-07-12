@@ -13,203 +13,110 @@ namespace MovieAppNewVersion.Controllers
 {
     public class AdminController : Controller
     {
-        private readonly MovieContext _movieContext;
-        public AdminController(MovieContext movieContext)
+        private IMovieRepository _movieRepository;
+        private ICategoryRepository _categoryRepository;
+        public AdminController(IMovieRepository movieRepository, ICategoryRepository categoryRepository)
         {
-            _movieContext =movieContext;
-        }
-        public IActionResult Index()
-        {
-            return View();
+            _movieRepository = movieRepository;
+            _categoryRepository = categoryRepository;
         }
         public IActionResult MovieList()
         {
-            var movies = _movieContext.Movies.AsQueryable();
-            var model = new AdminMoviesViewModel()
-            {
-                Movies = movies
-                .Include(m => m.Categories)
-                .Select(i => new AdminMovieModel()
-                {
-                    MovieId = i.MovieId,
-                    MovieImage = i.MovieImage,
-                    MovieTitle = i.MovieTitle,
-                    Categories=i.Categories.Select(c=>new CategoryMovieModel()
-                    {
-                        Name=c.Name
-                    }).ToList()
-                })
-                .ToList()
-            };
-            return View(model);
+            var movies = _movieRepository.GetAll()
+               .Include(i=>i.Categories);
+            return View(movies);
         }
         public IActionResult CategoryList()
         {
-
-            return View( new AdminCategoriesViewModel
-            {
-                Categories=_movieContext.Categories.Select(g=> new AdminCategoryViewModel
-                {
-                    CategoryId=g.CategoryId,
-                    CategoryName=g.Name,
-                    Count=g.Movies.Count
-                }).ToList()
-            });
+            var categories = _categoryRepository.GetCategories()
+                .Include(i => i.Movies);
+            return View(categories);
         }
         [HttpGet]
-        public IActionResult Update(int ? id)
+        public async Task<IActionResult> Update(int id)
         {
-            if (id == null)
+            var updated = await _movieRepository.GetById(id);
+            ViewBag.Categories = _categoryRepository.GetCategories().ToList();
+            if (updated == null)
             {
                 return NotFound();
             }
-            var entity = _movieContext.Movies.Select(m => new UpdateMovieModel
-            {
-                MovieId = m.MovieId,
-                MovieTitle = m.MovieTitle,
-                Description = m.MovieDescription,
-                About = m.MovieAbout,
-                MovieImage = m.MovieImage,
-                SelectedCategories=m.Categories
-            }).FirstOrDefault(m=>m.MovieId==id);
-            ViewBag.Categories = _movieContext.Categories.ToList();
-            if (entity == null)
-            {
-                return NotFound();
-            }
-            return View(entity);
+            return View(updated);
         }
         [HttpPost]
-        public IActionResult Update(UpdateMovieModel model, int [] categoryId)
+        public async Task<IActionResult> Update(UpdateMovie model, int[] categoryId)
         {
-            var enitity = _movieContext.Movies.Include("Categories").FirstOrDefault(m=>m.MovieId==model.MovieId);
-            if (enitity == null)
-            {
-                return NotFound();
-            }
-            enitity.MovieTitle = model.MovieTitle;
-            enitity.MovieDescription = model.Description;
-            enitity.MovieAbout = model.About;
-            enitity.MovieImage = model.MovieImage;
-            enitity.Categories = categoryId.Select(
-                id => _movieContext.Categories.FirstOrDefault(i => i.CategoryId == id)).ToList();
-            _movieContext.SaveChanges();
+            model.Categories = categoryId.Select(i => _categoryRepository.Id(i)).ToList();
+            await _movieRepository.EditMovie(model);
             return RedirectToAction("MovieList");
         }
         [HttpGet]
-        public IActionResult Delete(int ? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null)
+            var result = await _movieRepository.GetById(id);
+            if (result != null)
             {
-                return NotFound();
+                return View(result);
             }
-            var model = _movieContext.Movies.Select(m => new DeleteMovieModel
-            {
-                MovieId = m.MovieId
-            }).FirstOrDefault(i => i.MovieId == id);
-            return View(model);
+            return NotFound();
         }
-        [HttpPost]
-        public IActionResult Delete(DeleteMovieModel model)
+        [HttpPost, ActionName("Delete")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var entity = _movieContext.Movies.Find(model.MovieId);
-            if (entity == null)
-            {
-                return NotFound();
-            }
-            _movieContext.Movies.Remove(entity);
-            _movieContext.SaveChanges();
+            await _movieRepository.DeleteMovie(id);
             return RedirectToAction("MovieList");
         }
         [HttpGet]
         public IActionResult Add()
         {
-            ViewBag.Categories = _movieContext.Categories.ToList();
+            ViewBag.Categories = _categoryRepository.GetCategories().ToList();
             return View();
         }
         [HttpPost]
-        public IActionResult Add(Movie model,int [] categoryId)
+        public IActionResult Add(AddMovie model,int [] categoryId)
         {
-            if (ModelState.IsValid)
+            model.Categories = new List<Category>();
+            foreach (var id in categoryId)
             {
-                model.Categories = new List<Category>();
-                foreach (var id in categoryId)
-                {
-                    model.Categories.Add(_movieContext.Categories.FirstOrDefault(i => i.CategoryId == id));
-                }
-                _movieContext.Movies.Add(model);
-                _movieContext.SaveChanges();
-                return RedirectToAction("MovieList","Admin");
+                model.Categories.Add(_categoryRepository.Id(id));
             }
-            ViewBag.Categories = _movieContext.Categories.ToList();
-            return View();
+            _movieRepository.AddMovie(model);
+             return RedirectToAction("MovieList","Admin");
         }
         [HttpGet]
-        public IActionResult CategoryUpdate(int ?id)
+        public ActionResult<Category> CategoryUpdate(int id)
         {
-            if (id == null)
+            var result = _categoryRepository.Id(id);
+            if (result == null)
             {
                 return NotFound();
             }
-            var entity = _movieContext
-                .Categories.Select(c=> new UpdateCategoryViewModel { 
-                    CategoryId=c.CategoryId,
-                    CategoryName=c.Name,
-                    AdminMovieModels=c.Movies.Select(i=> new AdminMovieModel
-                    {
-                         MovieId=i.MovieId,
-                         MovieTitle=i.MovieTitle,
-                         MovieImage=i.MovieImage
-                    }).ToList()
-                }).ToList()
-                .FirstOrDefault(i => i.CategoryId == id);
-            if (entity == null)
-            {
-                return NotFound();
-            }
-            return View(entity);
+            return View(result);
         }
         [HttpPost]
-        public IActionResult CategoryUpdate(UpdateCategoryViewModel model,int [] movieIds)
+        public async Task<IActionResult> CategoryUpdate(UpdateCategory updateCategory,int movieId)
         {
-            var entity = _movieContext.Categories
-                .Include("Movies")
-                .FirstOrDefault(i => i.CategoryId == model.CategoryId);
-            if (entity == null)
-            {
-                return NotFound();
-            }
-            entity.Name = model.CategoryName;
-            foreach (var id in movieIds)
-            {
-                entity.Movies.Remove(entity.Movies.FirstOrDefault(m => m.MovieId==id));
-            }
-            _movieContext.SaveChanges();
-            return RedirectToAction("CategoryList");
+            await _categoryRepository.EditCategory(updateCategory);
+            var updated =  _categoryRepository.Id(updateCategory.CategoryId);
+            var deletedMovie = updated.Movies.FirstOrDefault(m => m.MovieId == movieId);
+            updated.Movies.Remove(deletedMovie);
+            _categoryRepository.SaveChanges();
+           return RedirectToAction("CategoryList");
         }
         [HttpGet]
-        public IActionResult CategoryDelete(int ? id)
+        public async Task<IActionResult> CategoryDelete(int id)
         {
-            if (id == null)
+            var result =  _categoryRepository.Id(id);
+            if (result != null)
             {
-                return NotFound();
+                return View(result);
             }
-            var entity = _movieContext.Categories.Select(i => new DeleteCategoryModel
-            {
-                CategoryId = i.CategoryId
-            }).FirstOrDefault(a=> a.CategoryId==id);
-            return View(entity);
+            return NotFound();
         }
-        [HttpPost]
-        public IActionResult CategoryDelete(DeleteCategoryModel model)
+        [HttpPost, ActionName("CategoryDelete")]
+        public async Task<IActionResult> CategoryDeleteConfirmed(int id)
         {
-            var entity = _movieContext.Categories.Find(model.CategoryId);
-            if (entity == null)
-            {
-                return NotFound();
-            }
-            _movieContext.Categories.Remove(entity);
-            _movieContext.SaveChanges();
+            await _categoryRepository.DeleteCategory(id);
             return RedirectToAction("CategoryList");
         }
     }

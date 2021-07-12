@@ -1,4 +1,5 @@
 ﻿using MovieAppNewVersion.Entity;
+using MovieAppNewVersion.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,10 +9,12 @@ namespace MovieAppNewVersion.Data
 {
     public interface IMovieRepository
     {
-        Movie GetById(int id);
+        Task<Movie> GetById(int id);
         IQueryable<Movie> GetAll();
-        Movie AddMovie(Movie movie);
-        void DeleteMovie(int id);
-        Movie PutMovie(Movie movie);
+        Task<Movie> AddMovie(AddMovie movie);
+        Task<Movie> DeleteMovie(int id);
+        Task<Movie> EditMovie(UpdateMovie movie);
+        Task<Movie> UpdateMovie(UpdateMovie updateMovie);
+        void Save();
     }
 }

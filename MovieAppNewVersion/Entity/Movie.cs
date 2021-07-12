@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MovieAppNewVersion.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -14,7 +15,6 @@ namespace MovieAppNewVersion.Entity
         public string MovieDescription { get; set; }
         public string MovieImage { get; set; }
         public string MovieAbout { get; set; }
-
         public List<Category> Categories { get; set; }
     }
 }

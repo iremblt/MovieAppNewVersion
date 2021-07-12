@@ -1,4 +1,5 @@
-﻿using MovieAppNewVersion.Entity;
+﻿using Microsoft.EntityFrameworkCore;
+using MovieAppNewVersion.Entity;
 using MovieAppNewVersion.Models;
 using System;
 using System.Collections.Generic;
@@ -7,38 +8,54 @@ using System.Threading.Tasks;
 
 namespace MovieAppNewVersion.Data
 {
-    public static class CategoryRepository
+    public class CategoryRepository : ICategoryRepository
     {
-        private static readonly List<Category> _categories = null;
-        static CategoryRepository()
+        private MovieContext _movieContext;
+        public CategoryRepository(MovieContext movieContext)
         {
-            _categories = new List<Category>()
-            {
-                new Category(){Name="Action"},
-                new Category(){Name="Advanture"},
-                new Category(){Name="Comedy"},
-                new Category(){Name="Crime"},
-                new Category(){Name="Drama"},
-                new Category(){Name="Mystery"},
-                new Category(){Name="Romance"},
-                new Category(){Name="Sci-Fi"},
-                new Category(){Name="Thriller"}
-            };
+            _movieContext = movieContext;
         }
-        public static List<Category> Categories
+        public Category Id(int id)
         {
-            get
+            return _movieContext.Categories.FirstOrDefault(i => i.CategoryId == id);
+        }
+
+        public async Task<Category> DeleteCategory(int id)
+        {
+            var deleted = Id(id);
+            if (deleted != null)
             {
-                return _categories;
+                _movieContext.Categories.Remove(deleted);
+                await SaveChangeMethodAsync();
+                return deleted;
             }
+            return null;
         }
-        public static void Add(Category category)
+        public async Task<Category> EditCategory(UpdateCategory category)
         {
-            _categories.Add(category);
+            var result = await _movieContext.Categories
+                .Include(m => m.Movies)
+                .FirstOrDefaultAsync(i => i.CategoryId == category.CategoryId);
+            if (result != null)
+            {
+                result.Name = category.CategoryName;
+                await SaveChangeMethodAsync();
+                return result;
+            }
+            return null;
         }
-        public static Category GetById(int id)
+
+        public IQueryable<Category> GetCategories()
         {
-            return _categories.FirstOrDefault(i => i.CategoryId == id);
+            return _movieContext.Categories.AsQueryable();
+        }
+        public void SaveChanges()
+        {
+              _movieContext.SaveChanges();
+        }
+        private async Task SaveChangeMethodAsync()
+        {
+            await _movieContext.SaveChangesAsync();
         }
     }
 }

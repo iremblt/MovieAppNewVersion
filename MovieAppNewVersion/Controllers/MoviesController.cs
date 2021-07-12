@@ -13,22 +13,21 @@ namespace MovieAppNewVersion.Controllers
 {
     public class MoviesController : Controller
     {
-        private readonly MovieContext _movieContext;
-        public MoviesController(MovieContext movieContext)
+        private IMovieRepository _movieRepository;
+        private ICategoryRepository _categoryRepository;
+        public MoviesController(IMovieRepository movieRepository,ICategoryRepository categoryRepository)
         {
-            _movieContext = movieContext;
-        }
+            _movieRepository = movieRepository;
+            _categoryRepository = categoryRepository;
+    }
         public IActionResult List(int? id,string q)
         {
-            
-            //  var movies = MovieRepository.Movies;
-             var movies = _movieContext.Movies.AsQueryable();
-          //  var movies = _movieContext.Movies.ToList();
+            var movies = _movieRepository.GetAll();
             if (id != null)
             {
                 movies = movies
-                    .Include(i=>i.Categories)
-                    .Where(i => i.Categories.Any(c=>c.CategoryId==id));
+                   .Include(i => i.Categories)
+                   .Where(i => i.Categories.Any(c=>c.CategoryId==id));
             }
 
             if (!string.IsNullOrEmpty(q))
@@ -38,80 +37,81 @@ namespace MovieAppNewVersion.Controllers
                     i.MovieDescription.ToLower().Contains(q.ToLower())||
                     i.MovieAbout.ToLower().Contains(q.ToLower()));
             }
-            var viewmodel = new MovieViewModel()
-            {
-                Movies = movies.ToList()
-            };
+            var viewmodel = movies.ToList();
             return View(viewmodel);
         }
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            //   var movieId = MovieRepository.GetById(id);
-            //   return View(_movieContext.Movies.FirstOrDefault(i=>i.MovieId==id));
-            return View(_movieContext.Movies.Find(id));
+            var details = await _movieRepository.GetById(id);
+            return View(details);
         }
         [HttpGet]
-        public IActionResult Create()
+        public ActionResult<Movie> Create()
         {
-            //  ViewBag.Category = new SelectList(CategoryRepository.Categories, "CategoryId", "Name");
-            ViewBag.Category = new SelectList(_movieContext.Categories.ToList(),"CategoryId","Name");
-            ViewBag.Votes = VoteRepository.Votes.ToList();
+            ViewBagCategoryMethod();
             return View();
         }
         [HttpPost]
-        public IActionResult Create(Movie movie)
+        public async Task<IActionResult> Create(AddMovie movie,int [] categoryId)
         {
             if (ModelState.IsValid)
             {
-                // MovieRepository.AddMovie(movie);
-                _movieContext.Movies.Add(movie);
-                _movieContext.SaveChanges();
+                movie.Categories = new List<Category>();
+                foreach (var id in categoryId)
+                {
+                     movie.Categories.Add(_categoryRepository.Id(id));
+                }
+                await _movieRepository.AddMovie(movie);
                 TempData["message"] = $"{movie.MovieTitle} added";
                 return RedirectToAction("List");
             }
-        //    ViewBag.Votes = new SelectList(VoteRepository.Votes.ToList(), "VoteId", "VoteName");
-            //  ViewBag.Category = new SelectList(CategoryRepository.Categories,"CategoryId","Name");
-            ViewBag.Category = new SelectList(_movieContext.Categories.ToList(), "CategoryId", "Name");
+            ViewBagCategoryMethod();
             return View();
         }
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            // ViewBag.Category = new SelectList(CategoryRepository.Categories, "CategoryId", "Name");
-            ViewBag.Category = new SelectList(_movieContext.Categories.ToList(), "CategoryId", "Name");
-            //   return View(MovieRepository.GetById(id));
-            return View(_movieContext.Movies.Find(id));
+            var updated = await _movieRepository.GetById(id);
+            ViewBagCategoryMethod();
+            if (updated == null)
+            {
+                return NotFound();
+            }
+            return View(updated);
         }
         [HttpPost]
-        public IActionResult Edit(Movie movie)
+        public async Task<IActionResult> Edit(UpdateMovie model,int [] categoryId)
         {
             if (ModelState.IsValid)
             {
-                //MovieRepository.EditMovie(movie);
-                    _movieContext.Movies.Update(movie);
-                    _movieContext.SaveChanges();
-                    TempData["message"] = $"{movie.MovieTitle} editted";
-                    return RedirectToAction("Details","Movies",new { @id=movie.MovieId});               
+                model.Categories = categoryId.Select(i => _categoryRepository.Id(i)).ToList();
+                await _movieRepository.EditMovie(model);
+                TempData["message"] = $"{model.MovieTitle} editted";
+                return RedirectToAction("List");
             }
-            // ViewBag.Category = new SelectList(CategoryRepository.Categories, "CategoryId", "Name");
-            ViewBag.Category = new SelectList(_movieContext.Categories.ToList(), "CategoryId", "Name");
-            return View(movie);
+            ViewBagCategoryMethod();
+            return View(model);
         }
         [HttpGet]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            //  return View(MovieRepository.GetById(id));
-            return View(_movieContext.Movies.Find(id));
+            var result = await _movieRepository.GetById(id);
+            if (result != null)
+            {
+                return View(result);
+            }
+            return NotFound();
         }
         [HttpPost, ActionName("Delete")]
-        public IActionResult DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            //  MovieRepository.DeleteMovie(id);
-            var movies = _movieContext.Movies.Find(id);
-            _movieContext.Movies.Remove(movies);
-            _movieContext.SaveChanges();
-             TempData["message"]= $"{id} is deleted";
-             return RedirectToAction("List");
+            await _movieRepository.DeleteMovie(id);
+            TempData["message"]= $"{id} is deleted";
+            return RedirectToAction("List");
+        }
+        private void ViewBagCategoryMethod()
+        {
+            ViewBag.Categories = _categoryRepository.GetCategories().ToList();
         }
     }
 }

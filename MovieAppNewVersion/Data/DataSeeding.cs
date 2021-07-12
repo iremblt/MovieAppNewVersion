@@ -13,7 +13,6 @@ namespace MovieAppNewVersion.Data
     {
         public static void Seed(IApplicationBuilder app)
         {
-            //     MovieContext context = app.ApplicationServices.GetRequiredService<MovieContext>();
             var scope = app.ApplicationServices.CreateScope();
             var context = scope.ServiceProvider.GetService<MovieContext>();
             context.Database.Migrate();
@@ -179,36 +178,11 @@ namespace MovieAppNewVersion.Data
                     Movie=movies[1],Person=people[0],Name="Forrest",Chracter="Actor"
                 }
             };
-            //var votes = new List<Vote>()
-            //{
-            //    new Vote()
-            //    {
-            //        VoteName='1'
-            //    },
-            //    new Vote()
-            //    {
-            //        VoteName='2'
-            //    },
-            //    new Vote()
-            //    {
-            //        VoteName='3'
-            //    },
-            //    new Vote()
-            //    {
-            //        VoteName='4'
-            //    },
-            //    new Vote()
-            //    {
-            //        VoteName='5'
-            //    }
-            //};
-            //Silindiğinde Id 11 den başlar içeride olsaydı onu engellmek için
             if (context.Database.GetPendingMigrations().Count() == 0)
             {
                 if (context.Categories.Count() == 0)
                 {
                     context.Categories.AddRange(categories);
-                    //    context.SaveChanges();
                 }
                 if (context.Movies.Count() == 0)
                 {
@@ -230,10 +204,6 @@ namespace MovieAppNewVersion.Data
                 {
                     context.Crews.AddRange(crews);
                 }
-                //if (context.Votes.Count() == 0)
-                //{
-                //    context.Votes.AddRange(votes);
-                //}
                 context.SaveChanges();
             }
         }

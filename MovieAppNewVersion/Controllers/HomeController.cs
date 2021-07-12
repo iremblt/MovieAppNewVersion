@@ -10,20 +10,15 @@ namespace MovieAppNewVersion.Controllers
 {
     public class HomeController:Controller
     {
-        private readonly MovieContext _movieContext;
-        public HomeController(MovieContext movieContext)
+        private IMovieRepository _movieRepository;
+        public HomeController(IMovieRepository movieRepository)
         {
-            _movieContext = movieContext;
+            _movieRepository = movieRepository;
         }
         public IActionResult Index()
         {
-            //var movies = MovieRepository.Movies;
-            var movies = _movieContext.Movies.ToList();
-            var model = new HomePageViewModel()
-            {
-                PopulerMovies = movies
-            };
-        return View(model);
+            var movies = _movieRepository.GetAll();
+            return View(movies);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿@model Movie
+﻿@model AddMovie
 <h1>Add Movie</h1>
 <hr />
 <form method="post" asp-action="Create" asp-controller="Movies">
@@ -22,30 +22,18 @@
         <input asp-for="MovieImage" class="form-control" />
         <span asp-validation-for="MovieImage" class="text-danger"></span>
     </div>
-    @*<div class="form-group">
-        @foreach (var item in (List<Vote>)ViewBag.Votes)
-        {
-            <div class="form-check">
-                <input class="form-check-input"
-                       type="radio"
-                       name="voteId"
-                       value="@item.VoteId"
-                       id="category_@(item.VoteId)" />
-                <label class="form-check-label" for="vote_@(item.VoteId)">
-                    @item.VoteName
-                </label>
-            </div>
-        }
-    </div>*@
-
-    @*
-        <div class="form-group">
-            <label asp-for="CategoryId"></label>
-            <select asp-for="CategoryId" class="form-control" asp-items="@ViewBag.Category">
-                <option disabled selected value="">Select Category</option>
-            </select>
-            <span asp-validation-for="CategoryId" class="text-danger"></span>
-        </div>
-    *@
-    <button class="btn btn-primary" type="submit">Submit</button>
+            @foreach (var item in (List<Category>)ViewBag.Categories)
+            {
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="categoryId"
+                           value="@item.CategoryId"
+                           id="category_@(item.CategoryId)" />
+                    <label class="form-check-label" for="category_@(item.CategoryId)">
+                        @item.Name
+                    </label>
+                </div>
+            }
+        <button class="btn btn-primary" type="submit">Submit</button>
 </form>

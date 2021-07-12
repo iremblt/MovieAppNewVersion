@@ -15,130 +15,82 @@ namespace MovieAppNewVersion.Controllers
     [Route("[controller]")]
     public class ApiController : Controller
     {
-        private readonly MovieContext _movieContext;
-        public ApiController(MovieContext movieContext)
+        private IMovieRepository _movieRepository;
+        public ApiController(IMovieRepository movieRepository)
         {
-            _movieContext = movieContext;
+            _movieRepository = movieRepository;
         }
-        public IActionResult Index()
-        {
-            return View();
-        }
-
         [HttpGet("GetMovies")]
         public async Task<IActionResult> GetMovies()
         {
-            var list = _movieContext.Movies.AsQueryable();
-            var model = new MovieCategoryViewModel()
+            var list = _movieRepository.GetAll();
+            var model = new MovieCategoryViewModel
             {
-                Movies = list
-                .Select(i => new MovieViewMode
-                {
-
-                    MovieId = i.MovieId,
-                    MovieImage = i.MovieImage,
-                    MovieAbout = i.MovieAbout,
-                    MovieDescription = i.MovieDescription,
-                    MovieTitle = i.MovieTitle,
-                    Categories = i.Categories.Select(c => new CategoryViewModel
-                    {
-                        CategoryName = c.Name
+                 Movies = list
+                .Select(i=> new MovieViewMode 
+                { 
+                    MovieId=i.MovieId,
+                    MovieImage=i.MovieImage,
+                    MovieTitle=i.MovieTitle,
+                    Categories=i.Categories.Select(i=>new CategoryViewModel
+                    { 
+                        CategoryName=i.Name
                     }).ToList()
-                }).ToList()
+                })
+                .ToList()
             };
             return Ok(model);
         }
-        [HttpGet("GetOnlyThirdMovie")]
-        public async Task<IActionResult> GetOnlyThirdMovie()
-        {
-            //GetOnlyThirdMovive(3);
-            var id = 3;
-            //var movie = _movieContext.Movies.Find(id);
-            var movie = _movieContext.Movies.FirstOrDefault(i => i.MovieId == id);
-            return Ok(movie);
-        }
         [HttpGet("GetById/{id}")]
-       // [Route("{action}/{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-           var movie = _movieContext.Movies.FirstOrDefault(i => i.MovieId == id);
-           if (movie != null)
+            var movie =  await _movieRepository.GetById(id);
+            if (movie != null)
             {
-                return Ok(movie);  
+                var model = new MovieViewMode
+                {
+                    MovieImage = movie.MovieImage,
+                    MovieTitle = movie.MovieTitle,
+                    MovieId = movie.MovieId,
+                    Categories = movie.Categories.Select(i => new CategoryViewModel { CategoryName = i.Name }).ToList()
+                };
+                return Ok(model);
             }
             return Ok("The movie did not found");
         }
         [HttpPost("AddMovie")]
         public async Task<IActionResult> AddMovie(AddMovie movie)
         {
-            if (ModelState.IsValid)
+            await _movieRepository.AddMovie(movie);
+            var model = new MovieViewMode
             {
-                _movieContext.Movies.Add(new Movie()
-                {
-                    MovieAbout = movie.MovieAbout,
-                    MovieDescription = movie.MovieDescription,
-                    MovieImage = movie.MovieImage,
-                    MovieTitle = movie.MovieTitle,
-                    Categories = movie.Categories.Select(c => new Category
-                    {
-                        Name = c.Name
-                    }).ToList()
-                });
-                _movieContext.SaveChanges();
-                return Ok(movie);
-            }
-            return Ok("It couldnt add");
+                MovieImage = movie.MovieImage,
+                MovieTitle = movie.MovieTitle,
+                MovieId = movie.MovieId,
+                Categories = movie.Categories.Select(i => new CategoryViewModel { CategoryName = i.Name }).ToList()
+            };
+            return Ok(model);
         }
 
         [HttpDelete("DeleteMovie/{id}")]
-        public async Task<IActionResult> DeleteMovie(int id)
+        public async Task<ActionResult<Movie>> DeleteMovie(int id)
         {
-            var deletedmovie =_movieContext.Movies.FirstOrDefault(m => m.MovieId == id);
-            if (deletedmovie == null)
-            {
-                return BadRequest("There is no movie in this id");
-            }
-            _movieContext.Remove(deletedmovie);
-            _movieContext.SaveChanges();
-            return Ok(deletedmovie);
+            var deleted = await _movieRepository.DeleteMovie(id);
+            return Ok(deleted);
         }
         [HttpPut("UpdateMovie/{id}")]
-        public async Task<IActionResult> UpdateMovie(int id,UpdateMovie update)
+        public async Task<IActionResult> UpdateMovie(int id, UpdateMovie update)
         {
-            var updatedModel = _movieContext.Movies.FirstOrDefault(m=>m.MovieId==id);
-            if (updatedModel == null)
-                return BadRequest();
-
-
-            updatedModel.MovieAbout = update.MovieAbout;
-            updatedModel.MovieDescription = update.MovieDescription;
-            updatedModel.MovieImage = update.MovieImage;
-            updatedModel.MovieTitle = update.MovieTitle;
-            updatedModel.Categories = update.Categories;
-            _movieContext.SaveChanges();
-            return Ok(updatedModel);
+            update.MovieId = id;
+            await _movieRepository.UpdateMovie(update);
+            var model = new MovieViewMode
+            {
+                MovieImage = update.MovieImage,
+                MovieTitle = update.MovieTitle,
+                MovieId = update.MovieId,
+                Categories = update.Categories.Select(i => new CategoryViewModel { CategoryName = i.Name }).ToList()
+            };
+            return Ok(model);
         }
-
-
-        //[HttpPost("AddMovie")]
-        //public async Task<IActionResult>AddMovie(Movie movie)
-        //{
-        //    var m = _movieContext.Movies.Add(movie);
-        //    _movieContext.SaveChanges();
-        //   // return Ok(m);
-        //   return CreatedAtAction(nameof(GetById),new { id=movie.MovieId},movie);
-        //}
-        //[HttpDelete("DeleteMovie/{id}")]
-        //public async Task<IActionResult> DeleteMovie(int id)
-        //{
-        //    var movie = _movieContext.Movies.Find(id);
-        //    if (movie != null)
-        //    {
-        //        _movieContext.Movies.Remove(movie);
-        //        _movieContext.SaveChanges();
-        //        return Ok("Movie is deleted");
-        //    }
-        //    return Ok("There is no movie in this id.");
-        //}
     }
 }

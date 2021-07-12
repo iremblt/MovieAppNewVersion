@@ -21,19 +21,14 @@ namespace MovieAppNewVersion
             Configuration = configuration;
         }
         public IConfiguration Configuration { get; }
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<MovieContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("MsSQLConnection")));
-           // options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddScoped<IMovieRepository, MovieRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddControllersWithViews();
-   //         services.AddControllers().AddJsonOptions(x =>
-   //x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())

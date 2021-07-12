@@ -6,8 +6,8 @@
     }
 }
 @section menu{
-    @*@await Html.PartialAsync("_menu",Model.categories)*@
-    @await Component.InvokeAsync("Category")
+    @await Html.PartialAsync("_menu",Model.Categories)
+    @*@await Component.InvokeAsync("Category")*@
 }
 <div class="card mb-3">
     <div class="row g-0">
@@ -19,17 +19,6 @@
                 <h5 class="card-title">@Model.MovieTitle</h5>
                 <p class="card-text">@Model.MovieDescription</p>
                 <p class="card-text">@Model.MovieAbout</p>
-              @*@  @if (Model.MoviePlayers != null)
-                {
-                    <p class="card-text">
-                        <ul>
-                            @foreach (var player in Model.MoviePlayers)
-                            {
-                                <li>@player</li>
-                            }
-                        </ul>
-                    </p>
-                }*@
             </div>
         </div>
     </div>
