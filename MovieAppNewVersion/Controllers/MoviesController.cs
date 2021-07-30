@@ -1,67 +1,58 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using MovieAppNewVersion.Data;
-using MovieAppNewVersion.Entity;
-using MovieAppNewVersion.Models;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MovieAppNewVersion.Business.Abstract;
+using System.Collections.Generic;
+using MovieAppNewVersion.Entities.Concrete;
+using MovieAppNewVersion.DTO.DTOs.MovieDTO;
+using AutoMapper;
+using MovieAppNewVersion.DTO.DTOs.CategoryDTO;
 
 namespace MovieAppNewVersion.Controllers
 {
     public class MoviesController : Controller
     {
-        private IMovieRepository _movieRepository;
-        private ICategoryRepository _categoryRepository;
-        public MoviesController(IMovieRepository movieRepository,ICategoryRepository categoryRepository)
+        private readonly IMovieService _movieService;
+        private readonly ICategoryService _categoryService;
+        private readonly IMapper _mapper;
+        public MoviesController(IMovieService movieService, ICategoryService categoryService,IMapper mapper)
         {
-            _movieRepository = movieRepository;
-            _categoryRepository = categoryRepository;
-    }
-        public IActionResult List(int? id,string q)
-        {
-            var movies = _movieRepository.GetAll();
-            if (id != null)
-            {
-                movies = movies
-                   .Include(i => i.Categories)
-                   .Where(i => i.Categories.Any(c=>c.CategoryId==id));
-            }
-
-            if (!string.IsNullOrEmpty(q))
-            {
-                movies = movies.Where(
-                    i => i.MovieTitle.ToLower().Contains(q.ToLower())|| 
-                    i.MovieDescription.ToLower().Contains(q.ToLower())||
-                    i.MovieAbout.ToLower().Contains(q.ToLower()));
-            }
-            var viewmodel = movies.ToList();
-            return View(viewmodel);
+            _movieService = movieService;
+            _categoryService = categoryService;
+            _mapper = mapper;
         }
-        public async Task<IActionResult> Details(int id)
+        public IActionResult List(string q)
         {
-            var details = await _movieRepository.GetById(id);
+            var movies = _mapper.Map<List<MovieListDTO>>(_movieService.GetMoviesWithCategories());
+            if (!string.IsNullOrEmpty(q)) 
+            {
+                movies = _mapper.Map<List<MovieListDTO>>(_movieService.Search(q));
+            }
+            return View(movies);
+        }
+        public ActionResult<Movie> Details(int id)
+        {
+            var details = _mapper.Map<MovieListDTO>(_movieService.GetMovieByCategory(id));
             return View(details);
         }
         [HttpGet]
         public ActionResult<Movie> Create()
         {
             ViewBagCategoryMethod();
-            return View();
+            return View(new MovieAddDTO());
         }
         [HttpPost]
-        public async Task<IActionResult> Create(AddMovie movie,int [] categoryId)
+        public async Task<IActionResult> Create(MovieAddDTO movie, int[] categoryId)
         {
             if (ModelState.IsValid)
             {
                 movie.Categories = new List<Category>();
                 foreach (var id in categoryId)
                 {
-                     movie.Categories.Add(_categoryRepository.Id(id));
+                    movie.Categories.Add(_categoryService.GetCategoryByMovie(id));
                 }
-                await _movieRepository.AddMovie(movie);
+                var added = _mapper.Map<MovieAddDTO, Movie>(movie);
+                await _movieService.Add(added);
                 TempData["message"] = $"{movie.MovieTitle} added";
                 return RedirectToAction("List");
             }
@@ -69,9 +60,9 @@ namespace MovieAppNewVersion.Controllers
             return View();
         }
         [HttpGet]
-        public async Task<IActionResult> Edit(int id)
-        {
-            var updated = await _movieRepository.GetById(id);
+        public IActionResult Edit(int id)
+        { 
+            var updated = _mapper.Map<MovieUpdateDTO>(_movieService.GetMovieByCategory(id));
             ViewBagCategoryMethod();
             if (updated == null)
             {
@@ -80,12 +71,15 @@ namespace MovieAppNewVersion.Controllers
             return View(updated);
         }
         [HttpPost]
-        public async Task<IActionResult> Edit(UpdateMovie model,int [] categoryId)
+        public async Task<IActionResult> Edit(MovieUpdateDTO model, int[] categoryId)
         {
             if (ModelState.IsValid)
             {
-                model.Categories = categoryId.Select(i => _categoryRepository.Id(i)).ToList();
-                await _movieRepository.EditMovie(model);
+                var updated = _mapper.Map<MovieUpdateDTO, Movie>(model);
+                await _movieService.Update(updated);
+                var category = _mapper.Map<Movie>(_movieService.GetMovieByCategory(updated.MovieId));
+                category.Categories = categoryId.Select(i => _categoryService.GetById(i)).ToList();
+                await _movieService.Update(category);
                 TempData["message"] = $"{model.MovieTitle} editted";
                 return RedirectToAction("List");
             }
@@ -93,9 +87,9 @@ namespace MovieAppNewVersion.Controllers
             return View(model);
         }
         [HttpGet]
-        public async Task<IActionResult> Delete(int id)
+        public IActionResult Delete(int id)
         {
-            var result = await _movieRepository.GetById(id);
+            var result = _mapper.Map<MovieDeleteDTO>(_movieService.GetById(id));
             if (result != null)
             {
                 return View(result);
@@ -103,15 +97,16 @@ namespace MovieAppNewVersion.Controllers
             return NotFound();
         }
         [HttpPost, ActionName("Delete")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(MovieDeleteDTO movie)
         {
-            await _movieRepository.DeleteMovie(id);
-            TempData["message"]= $"{id} is deleted";
+            var deleted = _mapper.Map<MovieDeleteDTO, Movie>(movie);
+            await _movieService.Delete(deleted.MovieId);
+            TempData["message"] = $"{movie.MovieId} is deleted";
             return RedirectToAction("List");
         }
         private void ViewBagCategoryMethod()
         {
-            ViewBag.Categories = _categoryRepository.GetCategories().ToList();
+            ViewBag.Categories = _mapper.Map<List<CategoryListDTO>>(_categoryService.GetAll());
         }
     }
 }

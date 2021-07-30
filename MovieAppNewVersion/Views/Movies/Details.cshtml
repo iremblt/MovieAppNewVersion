@@ -1,4 +1,4 @@
-﻿@model Movie
+﻿@model MovieListDTO
 @if (TempData["message"] != null)
 {
     @section message{
@@ -7,7 +7,6 @@
 }
 @section menu{
     @await Html.PartialAsync("_menu",Model.Categories)
-    @*@await Component.InvokeAsync("Category")*@
 }
 <div class="card mb-3">
     <div class="row g-0">

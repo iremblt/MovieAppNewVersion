@@ -1,16 +1,16 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using MovieAppNewVersion.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+using MovieAppNewVersion.Business.Abstract;
+using MovieAppNewVersion.Business.Concrete;
+using MovieAppNewVersion.DataAccess.Abstract;
+using MovieAppNewVersion.DataAccess.Concrete.EntityFramework;
+using MovieAppNewVersion.DataAccess.Concrete.EntityFramework.Contexts;
+using MovieAppNewVersion.DataAccess.Concrete.EntityFramework.Repositories;
+using MovieAppNewVersion.Mapping;
+using MovieAppNewVersion.Middleware;
 
 namespace MovieAppNewVersion
 {
@@ -23,10 +23,22 @@ namespace MovieAppNewVersion
         public IConfiguration Configuration { get; }
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<MovieContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("MsSQLConnection")));
-            services.AddScoped<IMovieRepository, MovieRepository>();
-            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddDbContext<MovieContext>();
+            services.AddScoped<ICastRepository, EfCastRepository>();
+            services.AddScoped<ICategoryRepository, EfCategoryRepository>();
+            services.AddScoped<ICrewRepository, EfCrewRepository>();
+            services.AddScoped<IUserRepository, EfUserRepository>();
+            services.AddScoped<IPersonRepository, EfPersonRepository>();
+            services.AddScoped<IMovieRepository, EfMovieRepository>();
+            services.AddScoped<IVoteRepoistory, EfVoteRepository>();
+            services.AddScoped<ICastService, CastManager>();
+            services.AddScoped<IUserService, UserManager>();
+            services.AddScoped<ICrewService, CrewManager>();
+            services.AddScoped<IPersonService, PersonManager>();
+            services.AddScoped<ICategoryService, CategoryManager>();
+            services.AddScoped<IMovieService, MovieManager>();
+            services.AddScoped<IVoteService, VoteManager>();
+            services.AddAutoMapper(typeof(AutoMapperProfile));
             services.AddControllersWithViews();
         }
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -35,11 +47,11 @@ namespace MovieAppNewVersion
             { 
                 app.UseDeveloperExceptionPage();
                 DataSeeding.Seed(app);
+
             }
             app.UseStaticFiles();
-
+            app.UseRequestResponse();
             app.UseRouting();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

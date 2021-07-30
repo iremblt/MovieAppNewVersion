@@ -1,6 +1,6 @@
-﻿@model Movie
+﻿@model MovieDeleteDTO
 <h2>
-    <b>@Model.MovieTitle</b> Are you sure do you want to delete this?
+    <b>@Model.MovieId</b> Are you sure do you want to delete this?
 </h2>
 <form asp-controller="Movies" asp-action="Delete" method="post">
     <input type="hidden" asp-for="MovieId" />

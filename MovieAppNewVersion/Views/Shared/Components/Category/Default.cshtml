@@ -1,4 +1,4 @@
-﻿@model List<Category>
+﻿@model List<CategoryListDTO>
 <div class="list-group ">
     <a href="/Movies/List" class="list-group-item list-group-item-action @(ViewBag.SelectedCategory==null?"active":"")">All Categories</a>
     @foreach (var category in Model)

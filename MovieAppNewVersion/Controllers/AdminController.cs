@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MovieAppNewVersion.Data;
-using MovieAppNewVersion.Entity;
-using MovieAppNewVersion.Models;
-using System;
+using MovieAppNewVersion.Business.Abstract;
+using MovieAppNewVersion.DTO.DTOs.CategoryDTO;
+using MovieAppNewVersion.DTO.DTOs.MovieDTO;
+using MovieAppNewVersion.Entities.Concrete;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,47 +13,54 @@ namespace MovieAppNewVersion.Controllers
 {
     public class AdminController : Controller
     {
-        private IMovieRepository _movieRepository;
-        private ICategoryRepository _categoryRepository;
-        public AdminController(IMovieRepository movieRepository, ICategoryRepository categoryRepository)
+        private readonly IMovieService _movieService;
+        private readonly ICategoryService _categoryService;
+        private readonly IMapper _mapper;
+        public AdminController(IMovieService movieService, ICategoryService categoryService,IMapper mapper)
         {
-            _movieRepository = movieRepository;
-            _categoryRepository = categoryRepository;
+            _movieService = movieService;
+            _categoryService = categoryService;
+            _mapper = mapper;
         }
         public IActionResult MovieList()
         {
-            var movies = _movieRepository.GetAll()
-               .Include(i=>i.Categories);
+            var movies = _mapper.Map<List<MovieListDTO>>(_movieService.GetMoviesWithCategories());
             return View(movies);
         }
         public IActionResult CategoryList()
         {
-            var categories = _categoryRepository.GetCategories()
-                .Include(i => i.Movies);
+            var categories = _mapper.Map<List<CategoryListDTO>>(_categoryService.GetAll().Include(i => i.Movies));
             return View(categories);
         }
         [HttpGet]
-        public async Task<IActionResult> Update(int id)
+        public IActionResult Update(int id)
         {
-            var updated = await _movieRepository.GetById(id);
-            ViewBag.Categories = _categoryRepository.GetCategories().ToList();
+            var updated = _mapper.Map<MovieUpdateDTO>(_movieService.GetMovieByCategory(id));
+            ViewBag.Categories = _mapper.Map<List<CategoryListDTO>>(_categoryService.GetAll());
             if (updated == null)
             {
                 return NotFound();
             }
             return View(updated);
         }
-        [HttpPost]
-        public async Task<IActionResult> Update(UpdateMovie model, int[] categoryId)
+        [HttpPost] 
+        public async Task<IActionResult> Update(MovieUpdateDTO model, int[] categoryId)
         {
-            model.Categories = categoryId.Select(i => _categoryRepository.Id(i)).ToList();
-            await _movieRepository.EditMovie(model);
-            return RedirectToAction("MovieList");
+            if (ModelState.IsValid) 
+            {
+                var updated = _mapper.Map<MovieUpdateDTO, Movie>(model);
+                await _movieService.Update(updated);
+                var category = _mapper.Map<Movie>(_movieService.GetMovieByCategory(updated.MovieId));
+                category.Categories = categoryId.Select(i => _categoryService.GetById(i)).ToList();
+                await _movieService.Update(category);
+                return RedirectToAction("MovieList");
+            }
+            return View(model);
         }
         [HttpGet]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var result = await _movieRepository.GetById(id);
+        public IActionResult Delete(int id)
+        { 
+            var result = _mapper.Map<MovieDeleteDTO>(_movieService.GetById(id));
             if (result != null)
             {
                 return View(result);
@@ -61,32 +68,39 @@ namespace MovieAppNewVersion.Controllers
             return NotFound();
         }
         [HttpPost, ActionName("Delete")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(MovieDeleteDTO movie)
         {
-            await _movieRepository.DeleteMovie(id);
+            var deleted = _mapper.Map<MovieDeleteDTO, Movie>(movie);
+            await _movieService.Delete(deleted.MovieId);
             return RedirectToAction("MovieList");
         }
         [HttpGet]
         public IActionResult Add()
         {
-            ViewBag.Categories = _categoryRepository.GetCategories().ToList();
-            return View();
+            ViewBag.Categories = _mapper.Map<List<CategoryListDTO>>(_categoryService.GetAll());
+            return View(new MovieAddDTO());
         }
         [HttpPost]
-        public IActionResult Add(AddMovie model,int [] categoryId)
+        public IActionResult Add(MovieAddDTO model, int[] categoryId)
         {
-            model.Categories = new List<Category>();
-            foreach (var id in categoryId)
+
+            if (ModelState.IsValid)
             {
-                model.Categories.Add(_categoryRepository.Id(id));
+                model.Categories = new List<Category>();
+                foreach (var id in categoryId)
+                {
+                    model.Categories.Add(_categoryService.GetCategoryByMovie(id));
+                }
+                var movie = _mapper.Map<MovieAddDTO,Movie>(model);
+                _movieService.Add(movie);
+                return RedirectToAction("MovieList", "Admin");
             }
-            _movieRepository.AddMovie(model);
-             return RedirectToAction("MovieList","Admin");
+            return View(model);
         }
         [HttpGet]
         public ActionResult<Category> CategoryUpdate(int id)
         {
-            var result = _categoryRepository.Id(id);
+            var result = _mapper.Map<CategoryUpdateDTO>(_categoryService.GetCategoryByMovie(id));
             if (result == null)
             {
                 return NotFound();
@@ -94,19 +108,25 @@ namespace MovieAppNewVersion.Controllers
             return View(result);
         }
         [HttpPost]
-        public async Task<IActionResult> CategoryUpdate(UpdateCategory updateCategory,int movieId)
+        public async Task<IActionResult> CategoryUpdate(CategoryUpdateDTO updateCategory, int movieId)
         {
-            await _categoryRepository.EditCategory(updateCategory);
-            var updated =  _categoryRepository.Id(updateCategory.CategoryId);
-            var deletedMovie = updated.Movies.FirstOrDefault(m => m.MovieId == movieId);
-            updated.Movies.Remove(deletedMovie);
-            _categoryRepository.SaveChanges();
-           return RedirectToAction("CategoryList");
+            if (ModelState.IsValid) 
+            {
+                var updated = _mapper.Map<CategoryUpdateDTO, Category>(updateCategory);
+                await _categoryService.Update(updated);
+                var result = _mapper.Map<Category>(_categoryService.GetCategoryByMovie(updated.CategoryId));
+                var deletedMovie = result.Movies.FirstOrDefault(m => m.MovieId == movieId);
+                result.Movies.Remove(deletedMovie);
+                _categoryService.Save();
+                return RedirectToAction("CategoryList");
+            }
+            return View(updateCategory);
+
         }
         [HttpGet]
-        public async Task<IActionResult> CategoryDelete(int id)
+        public IActionResult CategoryDelete(int id)
         {
-            var result =  _categoryRepository.Id(id);
+            var result = _mapper.Map<CategoryDeleteDTO>(_categoryService.GetById(id));
             if (result != null)
             {
                 return View(result);
@@ -114,9 +134,10 @@ namespace MovieAppNewVersion.Controllers
             return NotFound();
         }
         [HttpPost, ActionName("CategoryDelete")]
-        public async Task<IActionResult> CategoryDeleteConfirmed(int id)
+        public async Task<IActionResult> CategoryDeleteConfirmed(CategoryDeleteDTO category)
         {
-            await _categoryRepository.DeleteCategory(id);
+            var deleted=_mapper.Map<CategoryDeleteDTO, Category>(category);
+            await _categoryService.Delete(deleted.CategoryId);
             return RedirectToAction("CategoryList");
         }
     }

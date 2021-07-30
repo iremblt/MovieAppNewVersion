@@ -1,4 +1,4 @@
-﻿@model Movie
+﻿@model MovieUpdateDTO
 <h1>Edit Movie</h1>
 <hr />
 <form method="post" asp-action="Edit" asp-controller="Movies">
@@ -21,7 +21,7 @@
     </div>
     <button class="btn btn-primary" type="submit">Submit</button>
     <div class="col-md-4">
-        @foreach (var item in (List<Category>)ViewBag.Categories)
+        @foreach (var item in (List<CategoryListDTO>)ViewBag.Categories)
         {
             <div class="form-check">
                 <input class="form-check-input"

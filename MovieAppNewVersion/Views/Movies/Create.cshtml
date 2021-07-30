@@ -1,4 +1,4 @@
-﻿@model AddMovie
+﻿@model MovieAddDTO
 <h1>Add Movie</h1>
 <hr />
 <form method="post" asp-action="Create" asp-controller="Movies">
@@ -22,7 +22,7 @@
         <input asp-for="MovieImage" class="form-control" />
         <span asp-validation-for="MovieImage" class="text-danger"></span>
     </div>
-            @foreach (var item in (List<Category>)ViewBag.Categories)
+            @foreach (var item in (List<CategoryListDTO>)ViewBag.Categories)
             {
                 <div class="form-check">
                     <input class="form-check-input"
