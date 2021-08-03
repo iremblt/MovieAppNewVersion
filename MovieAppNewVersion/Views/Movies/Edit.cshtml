@@ -20,6 +20,7 @@
         <input asp-for="MovieImage" class="form-control" value="@Model.MovieImage" />
     </div>
     <button class="btn btn-primary" type="submit">Submit</button>
+    <a asp-action="List" asp-controller="Movies" asp-route-id="@Model.MovieId" class="btn btn-danger"> Cancel </a>
     <div class="col-md-4">
         @foreach (var item in (List<CategoryListDTO>)ViewBag.Categories)
         {

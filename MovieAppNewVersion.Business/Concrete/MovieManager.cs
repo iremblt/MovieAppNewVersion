@@ -13,28 +13,29 @@ namespace MovieAppNewVersion.Business.Concrete
         {
             _movieRepository = movieRepository;
         }
-        public async Task<Movie> Add(Movie t)
+        public async Task<string> Create(Movie t)
         {
-            return await _movieRepository.Add(t);
+            return await _movieRepository.Create(t);
         }
 
-        public async Task<Movie> Delete(int id)
+        public async Task<string> Delete(int id)
         {
             return await _movieRepository.Delete(id);
         }
+
         public IQueryable<Movie> GetAll()
         {
             return _movieRepository.GetAll();
         }
 
-        public Movie GetById(int id)
+        public Movie GetById(int ?id)
         {
             return _movieRepository.GetById(id);
         }
 
-        public Movie GetMovieByCategory(int id)
+        public Movie GetMovieIncludeCategory(int id)
         {
-            return  _movieRepository.GetMovieByCategory(id);
+            return  _movieRepository.GetMovieIncludeCategory(id);
         }
 
         public IQueryable<Movie> GetMoviesWithCategories()
@@ -46,15 +47,32 @@ namespace MovieAppNewVersion.Business.Concrete
         {
             _movieRepository.Save();
         }
-
-        public IQueryable<Movie> Search(string q)
+        public IQueryable<Movie>Search(string q) 
         {
             return _movieRepository.Search(q);
         }
-
-        public async Task<Movie> Update(Movie t)
+        public async Task<string> Update(Movie t)
         {
-            return await _movieRepository.Update(t);
+             return await _movieRepository.Update(t);
+        }
+
+        public Movie AddCategoryToMovie(Movie movie, int[] categoryId)
+        {
+            return _movieRepository.AddCategoryToMovie(movie, categoryId);
+        }
+        public string IsMethodSuccess(int n) 
+        {
+            return _movieRepository.IsMethodSuccess(n);
+        }
+
+        public Task<string> EditAMovie(Movie movie, int[] categoryId)
+        {
+            return _movieRepository.EditAMovie(movie,categoryId);
+        }
+
+        public Task<string> CreateAMovie(Movie movie, int[] categoryId)
+        {
+            return _movieRepository.CreateAMovie(movie, categoryId);
         }
     }
 }

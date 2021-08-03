@@ -13,12 +13,12 @@ namespace MovieAppNewVersion.Business.Concrete
         {
             _personRepository = personRepository;
         }
-        public async Task<Person> Add(Person t)
+        public async Task<string> Create(Person t)
         {
-            return await _personRepository.Add(t);
+            return await _personRepository.Create(t);
         }
 
-        public async Task<Person> Delete(int id)
+        public async Task<string> Delete(int id)
         {
             return await _personRepository.Delete(id);
         }
@@ -28,9 +28,14 @@ namespace MovieAppNewVersion.Business.Concrete
             return _personRepository.GetAll();
         }
 
-        public Person GetById(int id)
+        public Person GetById(int ?id)
         {
             return _personRepository.GetById(id);
+        }
+
+        public string IsMethodSuccess(int n)
+        {
+            throw new System.NotImplementedException();
         }
 
         public void Save()
@@ -38,7 +43,7 @@ namespace MovieAppNewVersion.Business.Concrete
             _personRepository.Save();
         }
 
-        public async Task<Person> Update(Person t)
+        public async Task<string> Update(Person t)
         {
             return await _personRepository.Update(t);
         }

@@ -13,12 +13,12 @@ namespace MovieAppNewVersion.Business.Concrete
         {
             _voteRepository = voteRepoistory;
         }
-        public async Task<Vote> Add(Vote t)
+        public async Task<string> Create(Vote t)
         {
-            return await _voteRepository.Add(t);
+            return await _voteRepository.Create(t);
         }
 
-        public async Task<Vote> Delete(int id)
+        public async Task<string> Delete(int id)
         {
             return await _voteRepository.Delete(id);
         }
@@ -28,9 +28,14 @@ namespace MovieAppNewVersion.Business.Concrete
             return _voteRepository.GetAll();
         }
 
-        public Vote GetById(int id)
+        public Vote GetById(int ? id)
         {
             return _voteRepository.GetById(id);
+        }
+
+        public string IsMethodSuccess(int n)
+        {
+            throw new System.NotImplementedException();
         }
 
         public void Save()
@@ -38,7 +43,7 @@ namespace MovieAppNewVersion.Business.Concrete
             _voteRepository.Save();
         }
 
-        public async Task<Vote> Update(Vote t)
+        public async Task<string> Update(Vote t)
         {
             return await _voteRepository.Update(t);
         }

@@ -5,29 +5,27 @@ using System.Threading.Tasks;
 
 namespace MovieAppNewVersion.DataAccess.Concrete.EntityFramework.Repositories
 {
-    public class EfGenericRepository<T> : IGenericRepository<T> where T: class
+    public class EfGenericRepository<T> : IGenericRepository<T> where T : class
     {
         protected readonly MovieContext _movieAppContext;
         public EfGenericRepository(MovieContext movieAppContext)
         {
             _movieAppContext = movieAppContext;
         }
-        public async Task<T> Add(T t)
+        public async Task<string> Create(T t)
         {
-            var added = await _movieAppContext.Set<T>().AddAsync(t);
-            await _movieAppContext.SaveChangesAsync();
-            return added.Entity;
-
+            var added = _movieAppContext.Set<T>().Add(t);
+            var IsSuccess = await _movieAppContext.SaveChangesAsync();
+            return IsMethodSuccess(IsSuccess);
         }
-
-        public async Task<T> Delete(int id)
+        public async Task<string>Delete(int id)
         {
             var find = GetById(id);
             if (id != 0)
             {
                 var remove = _movieAppContext.Set<T>().Remove(find);
-                await _movieAppContext.SaveChangesAsync();
-                return remove.Entity;
+                var IsSuccess= await _movieAppContext.SaveChangesAsync();
+                return IsMethodSuccess(IsSuccess);
             }
             return null;
         }
@@ -36,7 +34,7 @@ namespace MovieAppNewVersion.DataAccess.Concrete.EntityFramework.Repositories
             return _movieAppContext.Set<T>().AsQueryable();
         }
 
-        public T GetById(int id)
+        public T GetById(int ?id)
         {
             return _movieAppContext.Set<T>().Find(id);
         }
@@ -45,12 +43,22 @@ namespace MovieAppNewVersion.DataAccess.Concrete.EntityFramework.Repositories
         {
             _movieAppContext.SaveChanges();
         }
-
-        public async Task<T> Update(T t)
+        public async Task<string> Update(T t)
         {
             var updated = _movieAppContext.Set<T>().Update(t);
-            await _movieAppContext.SaveChangesAsync();
-            return updated.Entity;
+            var IsSuccess = await _movieAppContext.SaveChangesAsync();
+            return IsMethodSuccess(IsSuccess);
+        } 
+        public string IsMethodSuccess(int n) 
+        {
+            if (n > 0)
+            {
+                return "The process succesfully to completed";
+            }
+            else
+            {
+                return "The process failed";
+            }
         }
     }
 }

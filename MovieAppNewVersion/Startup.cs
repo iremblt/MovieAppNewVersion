@@ -5,11 +5,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MovieAppNewVersion.Business.Abstract;
 using MovieAppNewVersion.Business.Concrete;
+using MovieAppNewVersion.Business.Concrete.Mapping;
 using MovieAppNewVersion.DataAccess.Abstract;
 using MovieAppNewVersion.DataAccess.Concrete.EntityFramework;
 using MovieAppNewVersion.DataAccess.Concrete.EntityFramework.Contexts;
 using MovieAppNewVersion.DataAccess.Concrete.EntityFramework.Repositories;
-using MovieAppNewVersion.Mapping;
 using MovieAppNewVersion.Middleware;
 
 namespace MovieAppNewVersion

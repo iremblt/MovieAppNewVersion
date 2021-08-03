@@ -1,6 +1,7 @@
 ﻿using MovieAppNewVersion.Business.Abstract;
 using MovieAppNewVersion.DataAccess.Abstract;
 using MovieAppNewVersion.Entities.Concrete;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,12 +14,12 @@ namespace MovieAppNewVersion.Business.Concrete
         {
             _categoryRepository = categoryRepository;
         }
-        public async Task<Category> Add(Category t)
+        public async Task<string> Create(Category t)
         {
-            return await _categoryRepository.Add(t);
+            return await _categoryRepository.Create(t);
         }
 
-        public async Task<Category> Delete(int id)
+        public async Task<string> Delete(int id)
         {
             return await _categoryRepository.Delete(id);
         }
@@ -28,14 +29,14 @@ namespace MovieAppNewVersion.Business.Concrete
             return _categoryRepository.GetAll();
         }
 
-        public Category GetById(int id)
+        public Category GetById(int ?id)
         {
             return _categoryRepository.GetById(id);
         }
 
-        public Category GetCategoryByMovie(int id)
+        public Category GetByIdCategoryIncludeMovie(int id)
         {
-            return _categoryRepository.GetCategoryByMovie(id);
+            return _categoryRepository.GetByIdCategoryIncludeMovie(id);
         }
 
         public void Save()
@@ -43,9 +44,19 @@ namespace MovieAppNewVersion.Business.Concrete
             _categoryRepository.Save();
         }
 
-        public async Task<Category> Update(Category t)
+        public async Task<string> Update(Category t)
         {
             return await _categoryRepository.Update(t);
+        }
+
+        public List<Category> GetCategoriesIncludeMovie()
+        {
+            return _categoryRepository.GetCategoriesIncludeMovies();
+        }
+
+        public string IsMethodSuccess(int n)
+        {
+            return _categoryRepository.IsMethodSuccess(n);
         }
     }
 }

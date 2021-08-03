@@ -16,7 +16,7 @@ namespace MovieAppNewVersion.Controllers
     {
         private readonly IMovieService _movieService;
         private readonly IMapper _mapper;
-        public ApiController(IMovieService movieService, IMapper mapper)
+        public ApiController(IMovieService movieService,IMapper mapper)
         {
             _movieService = movieService;
             _mapper = mapper;
@@ -29,8 +29,8 @@ namespace MovieAppNewVersion.Controllers
         }
         [HttpGet("GetById/{id}")]
         public IActionResult GetById(int id)
-            {
-            var movie = _mapper.Map<MovieViewModel>(_movieService.GetMovieByCategory(id));
+        {
+            var movie= _mapper.Map<MovieViewModel>(_movieService.GetMovieIncludeCategory(id));
             if (movie != null)
             {
                 return Ok(movie);
@@ -43,8 +43,8 @@ namespace MovieAppNewVersion.Controllers
             if (ModelState.IsValid) 
             {
                 var added = _mapper.Map<MovieAddDTO, Movie>(movie);
-                await _movieService.Add(added);
-                var model = _mapper.Map<MovieViewModel>(_movieService.GetMovieByCategory(added.MovieId));
+                await _movieService.Create(added);
+                var model = _mapper.Map<MovieViewModel>(_movieService.GetMovieIncludeCategory(added.MovieId));
                 return Ok(model);
             }
             return Ok("The movie couldn't added.");
@@ -53,9 +53,9 @@ namespace MovieAppNewVersion.Controllers
         [HttpDelete("DeleteMovie/{id}")]
         public async Task<IActionResult> DeleteMovie(int id)
         {
-            var delete = _mapper.Map<MovieDeleteDTO>(_movieService.GetById(id));
-            var deleted = await _movieService.Delete(delete.MovieId);
+            var deleted = await _movieService.Delete(id);
             return Ok(deleted);
+
         }
         [HttpPut("UpdateMovie/{id}")]
         public async Task<IActionResult> UpdateMovie(int id, MovieUpdateDTO update)
@@ -63,9 +63,9 @@ namespace MovieAppNewVersion.Controllers
             if (ModelState.IsValid) 
             { 
                 update.MovieId = id;
-                var updated = _mapper.Map<MovieUpdateDTO, Movie>(update);
+                var updated = _mapper.Map<MovieUpdateDTO,Movie>(update);
                 await _movieService.Update(updated);
-                var model = _mapper.Map<MovieViewModel>(_movieService.GetMovieByCategory(updated.MovieId));
+                var model = _mapper.Map<MovieViewModel>(_movieService.GetMovieIncludeCategory(updated.MovieId));
                 return Ok(model);
             }
             return Ok("The movie did not update");

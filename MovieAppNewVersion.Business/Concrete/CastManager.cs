@@ -13,12 +13,12 @@ namespace MovieAppNewVersion.Business.Concrete
         {
             _castRepository = castRepository;
         }
-        public async Task<Cast> Add(Cast t)
+        public async Task<string> Create(Cast t)
         {
-            return await _castRepository.Add(t);
+            return await _castRepository.Create(t);
         }
 
-        public async Task<Cast> Delete(int id)
+        public async Task<string>  Delete(int id)
         {
             return await _castRepository.Delete(id);
         }
@@ -28,19 +28,23 @@ namespace MovieAppNewVersion.Business.Concrete
             return _castRepository.GetAll();
         }
 
-        public Cast GetById(int id)
+        public Cast GetById(int ?id)
         {
             return _castRepository.GetById(id);
+        }
+
+        public string IsMethodSuccess(int n)
+        {
+            return _castRepository.IsMethodSuccess(n);
         }
 
         public void Save()
         {
             _castRepository.Save();
         }
-
-        public async Task<Cast> Update(Cast t)
+        public Task<string> Update(Cast t)
         {
-            return await _castRepository.Update(t);
+            return _castRepository.Update(t);
         }
     }
 }

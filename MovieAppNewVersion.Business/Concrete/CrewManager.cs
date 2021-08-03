@@ -13,23 +13,29 @@ namespace MovieAppNewVersion.Business.Concrete
         {
             _crewRepository = crewRepository;
         }
-        public async Task<Crew> Add(Crew t)
+        public async Task<string> Create(Crew t)
         {
-            return await _crewRepository.Add(t);
+            return await _crewRepository.Create(t);
         }
 
-        public async Task<Crew> Delete(int id)
+        public async Task<string> Delete(int id)
         {
             return await _crewRepository.Delete(id);
         }
+
         public IQueryable<Crew> GetAll()
         {
             return _crewRepository.GetAll();
         }
 
-        public Crew GetById(int id)
+        public Crew GetById(int ?id)
         {
             return _crewRepository.GetById(id);
+        }
+
+        public string IsMethodSuccess(int n)
+        {
+            throw new System.NotImplementedException();
         }
 
         public void Save()
@@ -37,7 +43,7 @@ namespace MovieAppNewVersion.Business.Concrete
             _crewRepository.Save();
         }
 
-        public async Task<Crew> Update(Crew t)
+        public async Task<string> Update(Crew t)
         {
             return await _crewRepository.Update(t);
         }

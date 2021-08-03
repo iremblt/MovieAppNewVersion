@@ -3,13 +3,14 @@ using System.Threading.Tasks;
 
 namespace MovieAppNewVersion.Business.Abstract
 {
-    public interface IGenericService<T> where T:class
+    public interface IGenericService<T> where T : class
     {
         IQueryable<T> GetAll();
-        Task<T> Add(T t);
-        Task<T> Delete(int id);
-        Task<T> Update(T t);
-        T GetById(int id);
+        Task<string> Create(T t);
+        Task<string> Delete(int id);
+        Task<string> Update(T t);
+        T GetById(int ?id);
         void Save();
+        string IsMethodSuccess(int n);
     }
 }
