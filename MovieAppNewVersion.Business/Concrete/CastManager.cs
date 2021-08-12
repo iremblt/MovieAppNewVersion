@@ -28,19 +28,14 @@ namespace MovieAppNewVersion.Business.Concrete
             return _castRepository.GetAll();
         }
 
-        public Cast GetById(int ?id)
+        public Cast GetById(int id)
         {
             return _castRepository.GetById(id);
         }
 
-        public string IsMethodSuccess(int n)
+        public async Task<string> Save()
         {
-            return _castRepository.IsMethodSuccess(n);
-        }
-
-        public void Save()
-        {
-            _castRepository.Save();
+            return await _castRepository.Save();
         }
         public Task<string> Update(Cast t)
         {

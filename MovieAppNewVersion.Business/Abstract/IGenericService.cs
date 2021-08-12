@@ -9,8 +9,7 @@ namespace MovieAppNewVersion.Business.Abstract
         Task<string> Create(T t);
         Task<string> Delete(int id);
         Task<string> Update(T t);
-        T GetById(int ?id);
-        void Save();
-        string IsMethodSuccess(int n);
+        T GetById(int id);
+        Task<string> Save();
     }
 }

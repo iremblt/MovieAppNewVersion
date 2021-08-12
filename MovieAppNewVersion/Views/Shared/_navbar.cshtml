@@ -18,11 +18,15 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/Category/CategoryList">Category List</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Movies/List">Search</a>
+                </li>
             </ul>
-            <form class="d-flex" method="get" action="/Movies/List">
-                <input class="form-control me-2"name="q" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>
+                @using (Html.BeginForm("List", "Movies"))
+                {
+                    @Html.TextBox("Search")
+                    <input type="submit" value="search" />
+                }
         </div>
     </div>
 </nav>

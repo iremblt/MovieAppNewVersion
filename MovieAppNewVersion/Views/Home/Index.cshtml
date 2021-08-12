@@ -1,10 +1,10 @@
-﻿@model IEnumerable<MovieListDTO>
+﻿@model IEnumerable<MovieCategoryViewModelDTO.MovieViewModel>
 @section header{
     @await Html.PartialAsync("_header")
 }
 <div id="movies">
-    @foreach (var movie in Model)
-    {
-        <partial name="/Views/Shared/_movie.cshtml" model="movie" />
-    }
+        @foreach (var movie in Model)
+        {
+            <partial name="/Views/Shared/_movie.cshtml" model="movie" />
+        }
 </div>

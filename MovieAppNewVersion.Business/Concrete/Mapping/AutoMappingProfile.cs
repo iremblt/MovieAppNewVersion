@@ -20,6 +20,7 @@ namespace MovieAppNewVersion.Business.Concrete.Mapping
             CreateMap<Category, CategoryDeleteDTO>().ReverseMap();
             CreateMap<Movie, MovieViewModel>().ReverseMap();
             CreateMap<Category, CategoryViewModel>().ReverseMap();
+            CreateMap<Movie, MovieSearchDTO>().ReverseMap();
         }
     }
 }

@@ -1,28 +1,34 @@
-﻿@model MovieUpdateDTO
+﻿@model MoviesAndCategoriesListsForEdit
 <h1>Edit Movie</h1>
 <hr />
-<form method="post" asp-action="Edit" asp-controller="Movies">
+<form method="post" asp-action="Edit" asp-controller="Movies" enctype="multipart/form-data">
     <div class="form-group">
-        <label asp-for="MovieTitle"></label>
-        <input type="hidden" asp-for="MovieId" value="@Model.MovieId" />
-        <input asp-for="MovieTitle" class="form-control" value="@Model.MovieTitle" />
+        <label asp-for="movieUpdate.MovieTitle"></label>
+        <input type="hidden" asp-for="movieUpdate.MovieId" value="@Model.movieUpdate.MovieId" />
+        <input asp-for="movieUpdate.MovieTitle" class="form-control" value="@Model.movieUpdate.MovieTitle" />
+        <span asp-validation-for="movieUpdate.MovieTitle" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="MovieDescription"></label>
-        <textarea asp-for="MovieDescription" class="form-control">@Model.MovieDescription</textarea>
+        <label asp-for="movieUpdate.MovieDescription"></label>
+        <textarea asp-for="movieUpdate.MovieDescription" class="form-control">@Model.movieUpdate.MovieDescription</textarea>
+        <span asp-validation-for="movieUpdate.MovieDescription" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="MovieAbout"></label>
-        <textarea asp-for="MovieAbout" class="form-control">@Model.MovieAbout</textarea>
+        <label asp-for="movieUpdate.MovieAbout"></label>
+        <textarea asp-for="movieUpdate.MovieAbout" class="form-control">@Model.movieUpdate.MovieAbout</textarea>
+        <span asp-validation-for="movieUpdate.MovieAbout" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="MovieImage"></label>
-        <input asp-for="MovieImage" class="form-control" value="@Model.MovieImage" />
+        <input type="hidden" name="MovieImage" value="@Model.movieUpdate.MovieImage" />
+        <label asp-for="movieUpdate.MovieImage"></label>
+        <input type="file" id="file" name="file" class="form-control" />
+        <span asp-validation-for="movieUpdate.MovieImage" class="text-danger"></span>
     </div>
     <button class="btn btn-primary" type="submit">Submit</button>
-    <a asp-action="List" asp-controller="Movies" asp-route-id="@Model.MovieId" class="btn btn-danger"> Cancel </a>
+    <br />@Html.AntiForgeryToken()
+    <a asp-action="List" asp-controller="Movies" asp-route-id="@Model.movieUpdate.MovieId" class="btn btn-danger"> Cancel </a>
     <div class="col-md-4">
-        @foreach (var item in (List<CategoryListDTO>)ViewBag.Categories)
+        @foreach (var item in Model.CategoriesList)
         {
             <div class="form-check">
                 <input class="form-check-input"

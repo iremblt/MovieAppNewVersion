@@ -3,9 +3,13 @@ using System.Threading.Tasks;
 using MovieAppNewVersion.Business.Abstract;
 using MovieAppNewVersion.Entities.Concrete;
 using MovieAppNewVersion.DTO.DTOs.MovieDTO;
-using AutoMapper;
-using System.Collections.Generic;
+using MovieAppNewVersion.DTO.DTOs.MovieCategoryDTO;
+using MovieAppNewVersion.Business.Concrete.Fluent_Validation;
 using MovieAppNewVersion.DTO.DTOs.CategoryDTO;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System;
 
 namespace MovieAppNewVersion.Controllers
 {
@@ -13,74 +17,79 @@ namespace MovieAppNewVersion.Controllers
     {
         private readonly IMovieService _movieService;
         private readonly ICategoryService _categoryService;
-        private readonly IMapper _mapper;
-        public MoviesController(IMovieService movieService, ICategoryService categoryService,IMapper mapper)
+        public MoviesController(IMovieService movieService, ICategoryService categoryService)
         {
             _movieService = movieService;
             _categoryService = categoryService;
-            _mapper = mapper;
         }
-        public IActionResult List(string q)
+        public IActionResult List(MovieSearchDTO searchDTO) 
         {
-            var movies = _mapper.Map<List<MovieListDTO>>(_movieService.GetMoviesWithCategories());
-            if (!string.IsNullOrEmpty(q))
+            if (searchDTO.Search!=null)
             {
-                movies = _mapper.Map<List<MovieListDTO>>(_movieService.Search(q));
+                var search = _movieService.Search(searchDTO);
+                return View(search);
             }
+            else
+            {
+            var movies = _movieService.GetAllMoviesIncludeCategories();
             return View(movies);
+            }
+
         }
         public ActionResult<Movie> Details(int id)
         {
-            var details = _mapper.Map<MovieListDTO>(_movieService.GetMovieIncludeCategory(id));
+            var details = _movieService.GetByMovieIdWithCategory(id);
             return View(details);
         }
         [HttpGet]
         public ActionResult<Movie> Create()
         {
-            GetAllCategories();
-            return View(new MovieAddDTO());
+            MoviesAndCategoriesListsForCreate moviesAndCategories = new MoviesAndCategoriesListsForCreate();
+            moviesAndCategories.CategoryList = _categoryService.GetAllCategories();
+            return View(moviesAndCategories);
         }
-        [HttpPost]
-        public async Task<IActionResult> Create(MovieAddDTO movieAdd, int[] categoryId)
+        [HttpPost,ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create (MoviesAndCategoriesListsForCreate Add,int [] categoryId, IFormFile file)
         {
             if (ModelState.IsValid)
             {
-                var adding = _mapper.Map<MovieAddDTO, Movie>(movieAdd);
-                string message= await _movieService.CreateAMovie(adding,categoryId);
+                string message= await _movieService.CreateAMovie(Add, categoryId,file);
                 TempData["message"] = message;
                 return RedirectToAction("List");
             }
-            GetAllCategories();
-            return View();
+            var moviesAndCategories= _movieService.GetCategoriesForCreateView(Add, categoryId);
+            return View(moviesAndCategories);
         }
         [HttpGet]
-        public IActionResult Edit(int id)
+        public IActionResult Edit (int id)
         {
-            var updated = _mapper.Map<MovieUpdateDTO>(_movieService.GetMovieIncludeCategory(id));
-            GetAllCategories();
+            MoviesAndCategoriesListsForEdit moviesAndCategories = new MoviesAndCategoriesListsForEdit();
+            moviesAndCategories.CategoriesList = _categoryService.GetAllCategories();
+            var updated = _movieService.GetByMovieIdWithUpdateDTO(id);
+            moviesAndCategories.movieUpdate = updated;
+            moviesAndCategories.Categories = updated.Categories;
             if (updated == null)
             {
                 return NotFound();
             }
-            return View(updated);
+            return View(moviesAndCategories);
         }
-        [HttpPost]
-        public async Task<IActionResult> Edit(MovieUpdateDTO movieUpdate,int [] categoryId)
+        [HttpPost,ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(MoviesAndCategoriesListsForEdit update, IFormFile file,int [] categoryId)
         {
             if (ModelState.IsValid)
             {
-                var updating = _mapper.Map<MovieUpdateDTO, Movie>(movieUpdate, _movieService.GetMovieIncludeCategory(movieUpdate.MovieId));
-                string message = await _movieService.EditAMovie(updating,categoryId);
+                string message = await _movieService.EditAMovie(update,categoryId,file);
                 TempData["message"] = message;
                 return RedirectToAction("List");
             }
-            GetAllCategories();
-            return View(movieUpdate);
+            var moviesAndCategories = _movieService.GetCategoriesForEditView(update, categoryId);
+            return View(moviesAndCategories);
         }
         [HttpGet]
         public IActionResult DeleteConfirmed(int id)
         {
-            var result = _movieService.GetById(id);
+            var result = _movieService.GetByMovieIdWithCategory(id);
             if (result != null)
             {
                 return View(result);
@@ -90,13 +99,9 @@ namespace MovieAppNewVersion.Controllers
         [HttpPost, ActionName("DeleteConfirmed")]
         public async Task<IActionResult> Delete(MovieDeleteDTO movie)
         {
-            var message= await _movieService.Delete(movie.MovieId);
+            var message= await _movieService.DeleteMovie(movie.MovieId);
             TempData["message"] = message;
             return RedirectToAction("List");
-        }
-        private void GetAllCategories()
-        {
-            ViewBag.Categories = _mapper.Map<List<CategoryListDTO>>(_categoryService.GetAll());
         }
     }
 }

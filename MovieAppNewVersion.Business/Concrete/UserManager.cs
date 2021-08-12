@@ -28,7 +28,7 @@ namespace MovieAppNewVersion.Business.Concrete
             return _userRepository.GetAll();
         }
 
-        public User GetById(int ?id)
+        public User GetById(int id)
         {
             return _userRepository.GetById(id);
         }
@@ -38,9 +38,9 @@ namespace MovieAppNewVersion.Business.Concrete
             throw new System.NotImplementedException();
         }
 
-        public void Save()
+        public async Task<string> Save()
         {
-            _userRepository.Save();
+            return await _userRepository.Save();
         }
 
         public async Task<string> Update(User t)

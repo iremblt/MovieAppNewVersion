@@ -1,7 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using MovieAppNewVersion.DataAccess.Abstract;
 using MovieAppNewVersion.DataAccess.Concrete.EntityFramework.Contexts;
 using MovieAppNewVersion.Entities.Concrete;
+using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -26,25 +29,6 @@ namespace MovieAppNewVersion.DataAccess.Concrete.EntityFramework.Repositories
         {
             return _movieAppContext.Movies.Include(i => i.Categories).AsQueryable();
         }
-        public IQueryable<Movie>Search(string q) 
-        {
-            var search = _movieAppContext.Movies.AsQueryable();
-            search = search.Where(i=>i.MovieAbout.Contains(q.ToLower())||i.MovieDescription.Contains(q.ToLower())
-            ||i.MovieTitle.Contains(q.ToLower()));
-            return search;
-        }
-        public async Task<string> CreateAMovie(Movie movie, int[] categoryId)
-        {
-             AddCategoryToMovie(movie, categoryId);
-             string message= await Create(movie);
-             return message;
-        }
-        public async Task<string> EditAMovie(Movie movie, int[] categoryId)
-        {
-            AddCategoryToMovie(movie, categoryId);
-            string message= await Update(movie);
-            return message;
-        }
         public Movie AddCategoryToMovie(Movie movie, int[] categoryId)
         {
             if (categoryId != null)
@@ -53,6 +37,16 @@ namespace MovieAppNewVersion.DataAccess.Concrete.EntityFramework.Repositories
                 {
                     movie.Categories.Add(_categoryRepository.GetById(id));
                 }
+            }
+            return movie;
+        }
+        public Movie AddImageFileToMovie(IFormFile file,Movie movie)
+        {
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img", file.FileName);
+            movie.MovieImage = file.FileName;
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                file.CopyTo(stream);
             }
             return movie;
         }

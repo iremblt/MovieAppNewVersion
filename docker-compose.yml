@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  movieappnewversion:
+    image: ${DOCKER_REGISTRY-}movieappnewversion
+    build:
+      context: .
+      dockerfile: MovieAppNewVersion/Dockerfile

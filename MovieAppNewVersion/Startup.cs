@@ -1,3 +1,4 @@
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -5,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MovieAppNewVersion.Business.Abstract;
 using MovieAppNewVersion.Business.Concrete;
+using MovieAppNewVersion.Business.Concrete.Fluent_Validation.CategoryValidator;
+using MovieAppNewVersion.Business.Concrete.Fluent_Validation.MovieValidator;
 using MovieAppNewVersion.Business.Concrete.Mapping;
 using MovieAppNewVersion.DataAccess.Abstract;
 using MovieAppNewVersion.DataAccess.Concrete.EntityFramework;
@@ -39,7 +42,11 @@ namespace MovieAppNewVersion
             services.AddScoped<IMovieService, MovieManager>();
             services.AddScoped<IVoteService, VoteManager>();
             services.AddAutoMapper(typeof(AutoMapperProfile));
-            services.AddControllersWithViews();
+            services.AddControllersWithViews().AddFluentValidation(i =>
+            {
+                i.RegisterValidatorsFromAssemblyContaining<MovieValidator>();
+                i.RegisterValidatorsFromAssemblyContaining<CategoryValidator>();
+            });
         }
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {

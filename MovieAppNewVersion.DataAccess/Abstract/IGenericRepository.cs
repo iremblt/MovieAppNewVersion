@@ -6,11 +6,10 @@ namespace MovieAppNewVersion.DataAccess.Abstract
     public interface IGenericRepository<T> where T:class
     {
         IQueryable<T> GetAll();
-        T GetById(int ?id);
+        T GetById(int id);
         Task<string> Create(T t);
         Task<string> Delete(int id);
         Task<string> Update(T t);
-        void Save();
-        string  IsMethodSuccess(int n);
+        Task<string> Save();
     }
 }

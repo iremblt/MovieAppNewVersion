@@ -28,19 +28,14 @@ namespace MovieAppNewVersion.Business.Concrete
             return _personRepository.GetAll();
         }
 
-        public Person GetById(int ?id)
+        public Person GetById(int id)
         {
             return _personRepository.GetById(id);
         }
 
-        public string IsMethodSuccess(int n)
+        public async Task<string> Save()
         {
-            throw new System.NotImplementedException();
-        }
-
-        public void Save()
-        {
-            _personRepository.Save();
+           return await _personRepository.Save();
         }
 
         public async Task<string> Update(Person t)

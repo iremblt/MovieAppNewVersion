@@ -1,13 +1,9 @@
-﻿using AutoMapper;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using MovieAppNewVersion.Business.Abstract;
 using MovieAppNewVersion.DTO.DTOs.MovieDTO;
-using MovieAppNewVersion.Entities.Concrete;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using static MovieAppNewVersion.DTO.DTOs.MovieCategoryDTO.MovieCategoryViewModelDTO;
-
 namespace MovieAppNewVersion.Controllers
 {
     [ApiController]
@@ -15,22 +11,20 @@ namespace MovieAppNewVersion.Controllers
     public class ApiController : Controller
     {
         private readonly IMovieService _movieService;
-        private readonly IMapper _mapper;
-        public ApiController(IMovieService movieService,IMapper mapper)
+        public ApiController(IMovieService movieService)
         {
             _movieService = movieService;
-            _mapper = mapper;
         }
         [HttpGet("GetMovies")]
         public IActionResult GetMovies()
         {
-            var model = _mapper.Map<List<MovieViewModel>>(_movieService.GetMoviesWithCategories());
+            var model = _movieService.GetAllMoviesIncludeCategories();
             return Ok(model);
         }
         [HttpGet("GetById/{id}")]
         public IActionResult GetById(int id)
         {
-            var movie= _mapper.Map<MovieViewModel>(_movieService.GetMovieIncludeCategory(id));
+            var movie= _movieService.GetMovieWithMapping(id);
             if (movie != null)
             {
                 return Ok(movie);
@@ -38,14 +32,12 @@ namespace MovieAppNewVersion.Controllers
             return Ok("The movie did not found");
         }
         [HttpPost("AddMovie")]
-        public async Task<IActionResult> AddMovie(MovieAddDTO movie)
+        public async Task<IActionResult> AddMovie(MovieAddDTO movie, IFormFile file)
         {
             if (ModelState.IsValid) 
             {
-                var added = _mapper.Map<MovieAddDTO, Movie>(movie);
-                await _movieService.Create(added);
-                var model = _mapper.Map<MovieViewModel>(_movieService.GetMovieIncludeCategory(added.MovieId));
-                return Ok(model);
+                var model = await _movieService.CreateMovie(movie,file);
+                return Ok("Movie");
             }
             return Ok("The movie couldn't added.");
         }
@@ -53,19 +45,17 @@ namespace MovieAppNewVersion.Controllers
         [HttpDelete("DeleteMovie/{id}")]
         public async Task<IActionResult> DeleteMovie(int id)
         {
-            var deleted = await _movieService.Delete(id);
+            var deleted = await _movieService.DeleteMovie(id);
             return Ok(deleted);
 
         }
-        [HttpPut("UpdateMovie/{id}")]
-        public async Task<IActionResult> UpdateMovie(int id, MovieUpdateDTO update)
+        [HttpPut("UpdateMovie/{id}")] //Postman de gözükmyor
+        public async Task<IActionResult> UpdateMovie(int id, MovieUpdateDTO update, IFormFile file)
         {
-            if (ModelState.IsValid) 
-            { 
+            if (ModelState.IsValid)
+            {
                 update.MovieId = id;
-                var updated = _mapper.Map<MovieUpdateDTO,Movie>(update);
-                await _movieService.Update(updated);
-                var model = _mapper.Map<MovieViewModel>(_movieService.GetMovieIncludeCategory(updated.MovieId));
+                var model = await _movieService.EditMovie(update,file);
                 return Ok(model);
             }
             return Ok("The movie did not update");

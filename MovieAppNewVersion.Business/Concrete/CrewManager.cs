@@ -28,19 +28,14 @@ namespace MovieAppNewVersion.Business.Concrete
             return _crewRepository.GetAll();
         }
 
-        public Crew GetById(int ?id)
+        public Crew GetById(int id)
         {
             return _crewRepository.GetById(id);
         }
 
-        public string IsMethodSuccess(int n)
+        public async Task<string> Save()
         {
-            throw new System.NotImplementedException();
-        }
-
-        public void Save()
-        {
-            _crewRepository.Save();
+            return await _crewRepository.Save();
         }
 
         public async Task<string> Update(Crew t)

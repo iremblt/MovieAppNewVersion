@@ -1,39 +1,41 @@
-﻿@model MovieAddDTO
+﻿@model MoviesAndCategoriesListsForCreate
 <h1>Add Movie</h1>
 <hr />
-<form method="post" asp-action="Create" asp-controller="Movies">
+<form method="post" asp-action="Create" asp-controller="Movies" enctype="multipart/form-data">
+    <br />@Html.AntiForgeryToken()
     <div class="form-group">
-        <label asp-for="MovieTitle"></label>
-        <input asp-for="MovieTitle" class="form-control" />
-        <span asp-validation-for="MovieTitle" class="text-danger"></span>
+        <label asp-for="movieAdd.MovieTitle"></label>
+        <input asp-for="movieAdd.MovieTitle" class="form-control" />
+        <span asp-validation-for="movieAdd.MovieTitle" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="MovieDescription"></label>
-        <textarea asp-for="MovieDescription" class="form-control"></textarea>
-        <span asp-validation-for="MovieDescription" class="text-danger"></span>
+        <label asp-for="movieAdd.MovieDescription"></label>
+        <textarea asp-for="movieAdd.MovieDescription" class="form-control"></textarea>
+        <span asp-validation-for="movieAdd.MovieDescription" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="MovieAbout"></label>
-        <textarea asp-for="MovieAbout" class="form-control"></textarea>
-        <span asp-validation-for="MovieAbout" class="text-danger"></span>
+        <label asp-for="movieAdd.MovieAbout"></label>
+        <textarea asp-for="movieAdd.MovieAbout" class="form-control"></textarea>
+        <span asp-validation-for="movieAdd.MovieAbout" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="MovieImage"></label>
-        <input asp-for="MovieImage" class="form-control" />
-        <span asp-validation-for="MovieImage" class="text-danger"></span>
+        <label asp-for="movieAdd.MovieImage"></label>
+        <input type="file" id="file" name="file" class="form-control" />
+        <span asp-validation-for="movieAdd.MovieImage" class="text-danger"></span>
     </div>
-            @foreach (var item in (List<CategoryListDTO>)ViewBag.Categories)
-            {
-                <div class="form-check">
-                    <input class="form-check-input"
-                           type="checkbox"
-                           name="categoryId"
-                           value="@item.CategoryId"
-                           id="category_@(item.CategoryId)" />
-                    <label class="form-check-label" for="category_@(item.CategoryId)">
-                        @item.Name
-                    </label>
-                </div>
-            }
-        <button class="btn btn-primary" type="submit">Submit</button>
+    @foreach (var item in Model.CategoryList)
+    {
+        <div class="form-check">
+            <input class="form-check-input"
+                   type="checkbox"
+                   name="categoryId"
+                   value="@item.CategoryId"
+                   id="category_@(item.CategoryId)" 
+                   @(Model.SelectedCategories!=null && Model.SelectedCategories.Any(i => i.CategoryId == item.CategoryId) ? "checked" : "") />
+            <label class="form-check-label" for="category_@(item.CategoryId)">
+                @item.Name
+            </label>
+        </div>
+    }
+    <button class="btn btn-primary" type="submit">Submit</button>
 </form>

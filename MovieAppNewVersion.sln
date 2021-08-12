@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieAppNewVersion.Entities
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieAppNewVersion.DataAccess", "MovieAppNewVersion.DataAccess\MovieAppNewVersion.DataAccess.csproj", "{1ADFE857-4F20-4400-A78A-E7E2C4B33DBB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieAppNewVersion.DTO", "MovieAppNewVersion.DTO\MovieAppNewVersion.DTO.csproj", "{B685476A-8EBB-48F9-B0A0-2E92538DBEEF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieAppNewVersion.DTO", "MovieAppNewVersion.DTO\MovieAppNewVersion.DTO.csproj", "{B685476A-8EBB-48F9-B0A0-2E92538DBEEF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieAppNewVersion.Test", "MovieAppNewVersion.Test\MovieAppNewVersion.Test.csproj", "{67CF2918-FE2B-46A3-B467-6D48B7BE1ED7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{B685476A-8EBB-48F9-B0A0-2E92538DBEEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B685476A-8EBB-48F9-B0A0-2E92538DBEEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B685476A-8EBB-48F9-B0A0-2E92538DBEEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67CF2918-FE2B-46A3-B467-6D48B7BE1ED7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67CF2918-FE2B-46A3-B467-6D48B7BE1ED7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67CF2918-FE2B-46A3-B467-6D48B7BE1ED7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67CF2918-FE2B-46A3-B467-6D48B7BE1ED7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

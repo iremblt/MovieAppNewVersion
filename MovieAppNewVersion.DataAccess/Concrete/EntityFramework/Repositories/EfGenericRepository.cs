@@ -14,18 +14,16 @@ namespace MovieAppNewVersion.DataAccess.Concrete.EntityFramework.Repositories
         }
         public async Task<string> Create(T t)
         {
-            var added = _movieAppContext.Set<T>().Add(t);
-            var IsSuccess = await _movieAppContext.SaveChangesAsync();
-            return IsMethodSuccess(IsSuccess);
+             _movieAppContext.Set<T>().Add(t);
+            return await Save();
         }
         public async Task<string>Delete(int id)
         {
             var find = GetById(id);
             if (id != 0)
             {
-                var remove = _movieAppContext.Set<T>().Remove(find);
-                var IsSuccess= await _movieAppContext.SaveChangesAsync();
-                return IsMethodSuccess(IsSuccess);
+                 _movieAppContext.Set<T>().Remove(find);
+                return await Save();
             }
             return null;
         }
@@ -34,24 +32,15 @@ namespace MovieAppNewVersion.DataAccess.Concrete.EntityFramework.Repositories
             return _movieAppContext.Set<T>().AsQueryable();
         }
 
-        public T GetById(int ?id)
+        public T GetById(int id)
         {
             return _movieAppContext.Set<T>().Find(id);
         }
 
-        public void Save()
+        public async Task<string> Save()
         {
-            _movieAppContext.SaveChanges();
-        }
-        public async Task<string> Update(T t)
-        {
-            var updated = _movieAppContext.Set<T>().Update(t);
-            var IsSuccess = await _movieAppContext.SaveChangesAsync();
-            return IsMethodSuccess(IsSuccess);
-        } 
-        public string IsMethodSuccess(int n) 
-        {
-            if (n > 0)
+            var result=await _movieAppContext.SaveChangesAsync();
+            if (result > 0)
             {
                 return "The process succesfully to completed";
             }
@@ -60,5 +49,10 @@ namespace MovieAppNewVersion.DataAccess.Concrete.EntityFramework.Repositories
                 return "The process failed";
             }
         }
+        public async Task<string> Update(T t)
+        {
+             _movieAppContext.Set<T>().Update(t);
+            return await Save();
+        } 
     }
 }

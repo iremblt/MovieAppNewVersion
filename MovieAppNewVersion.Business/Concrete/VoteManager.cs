@@ -28,19 +28,14 @@ namespace MovieAppNewVersion.Business.Concrete
             return _voteRepository.GetAll();
         }
 
-        public Vote GetById(int ? id)
+        public Vote GetById(int id)
         {
             return _voteRepository.GetById(id);
         }
 
-        public string IsMethodSuccess(int n)
+        public async Task<string> Save()
         {
-            throw new System.NotImplementedException();
-        }
-
-        public void Save()
-        {
-            _voteRepository.Save();
+            return await _voteRepository.Save();
         }
 
         public async Task<string> Update(Vote t)
